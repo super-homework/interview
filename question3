@@ -1,0 +1,35 @@
+__author__ = 'Albert'
+
+import MySQLdb as mysql
+import sys
+
+cache = [] # default cache is memory
+file_size = 100 # default memory size limit is 100
+
+def initial_db(hostname = "localhost",user = "ROOT", passwd = "PASSWORD",db = "DB"):
+    con  = mysql.connect(hostnanme = hostname,user = user,passwd = passwd,db = db)
+    cursor = con.cursor()
+    create_table = """CREATE TABLE test(
+                    a VARCHAR(20),
+                    b VARCHAR(20),
+                    C REAL,
+                    d INTEGER)"""
+    cursor.execute(create_table)
+    return cursor
+
+def addData(limit, cursor, data):
+    global cache
+    while (len(cache) < limit):
+        cache.append(data)
+    updateSQL(cache,cursor)
+    cache = []
+
+def updateSQL(cacheList,cursor):
+    statment = """INSERT INTO test VALUE(?,?,?,?)"""
+    cursor.executemany(statment,cacheList)
+    cursor.commit()
+
+if __name__ == "__main__":
+    cur = initial_db()
+    data = (sys.argv[1:4])
+    addData(limit=file_size,cursor= cur,data=data)
